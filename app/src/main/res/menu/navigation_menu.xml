@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menuItem_home"
+            android:icon="@drawable/baseline_home_24"
+            android:title="@string/menuItem1"
+
+            />
+        <item
+            android:id="@+id/menuItem_profile"
+            android:icon="@drawable/baseline_account_circle_24"
+            android:title="@string/menuItem2" />
+        <item
+            android:id="@+id/menuItem_group1"
+            android:enabled="false"
+            android:title="@string/menuGroup1" />
+        <item
+            android:id="@+id/menuItem_cart"
+            android:icon="@drawable/cart"
+            android:title="@string/menuItem3" />
+        <item
+            android:id="@+id/menuItem_wishlist"
+            android:icon="@drawable/wishlist"
+            android:title="@string/menuItem4" />
+        <item
+            android:id="@+id/menuItem_purchases"
+            android:icon="@drawable/purchases"
+            android:title="@string/menuItem5" />
+        <item
+            android:id="@+id/menuItem_group2"
+            android:enabled="false"
+            android:title="@string/menuGroup2" />
+        <item
+            android:id="@+id/menuItem_orders"
+            android:icon="@drawable/orders"
+            android:title="@string/menuItem6" />
+        <item
+            android:id="@+id/menuItem_products"
+            android:icon="@drawable/baseline_add_shopping_cart_24"
+            android:title="@string/menuItem7" />
+        <item
+            android:id="@+id/menuItem_group3"
+            android:enabled="false"
+            android:title="@string/menuGroup3" />
+        <item
+            android:id="@+id/menuItem_seetings"
+            android:icon="@drawable/setting"
+            android:title="@string/menuItem8" />
+        <item
+            android:id="@+id/menuItem_logout"
+            android:icon="@drawable/logout"
+            android:title="@string/menuItem9" />
+    </group>
+
+
+</menu>

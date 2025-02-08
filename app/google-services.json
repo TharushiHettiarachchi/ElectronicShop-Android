@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "121415490652",
+    "project_id": "electronicshop-1c0d1",
+    "storage_bucket": "electronicshop-1c0d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121415490652:android:e7e5b020273f46ec7c1a99",
+        "android_client_info": {
+          "package_name": "lk.webstudio.elecshop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtDBC961mgmEXFwzhhI7jxEcYtE5Te34M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

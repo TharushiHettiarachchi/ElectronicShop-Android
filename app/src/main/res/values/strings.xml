@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Electronic Shop</string>
+    <string name="signIn">Sign In</string>
+    <string name="signUp">Sign Up</string>
+    <string name="firstName">First Name</string>
+    <string name="lastName">Last Name</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="mobile">Mobile Number</string>
+    <string name="link1">Already have an account? Sign In</string>
+    <string name="link2">Don\'t have an account? Sign Up</string>
+    <string name="menuItem1">Home</string>
+    <string name="menuItem2">Profile</string>
+    <string name="menuItem3">Cart</string>
+    <string name="menuItem4">Wishlist</string>
+    <string name="menuItem5">Purchased Items</string>
+    <string name="menuItem6">Orders</string>
+    <string name="menuItem7">Products</string>
+    <string name="menuItem8">Settings</string>
+    <string name="menuItem9">Logout</string>
+    <string name="menuGroup1">Buyers</string>
+    <string name="menuGroup2">Sellers</string>
+    <string name="menuGroup3">Other</string>
+    <string name="search">Search</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="searchTxt">Search Products</string>
+    <string name="sampleEmail">tharushihettiarachchi12@gmail.com</string>
+    <string name="sampleName">Tharushi Hettiarachchi</string>
+    <string name="sampleProductName">Infarred Proximity Sensor</string>
+    <string name="sampleProductCode">GP2Y0A21YK0F</string>
+    <string name="sampleProductPrice">Rs. 1200.00</string>
+    <string name="sampleQty">12 Items</string>
+    <string name="addProduct">Add Product</string>
+    <string name="productName">Product Name</string>
+    <string name="productCategory">Product Category</string>
+    <string name="productPrice">Product Price</string>
+    <string name="productQty">Product Quantity</string>
+    <string name="productCode">Product Code</string>
+    <string name="addCart">Cart</string>
+    <string name="addWatchlist">Watchlist</string>
+    <string name="subTotal">Sub Total</string>
+    <string name="placeOrder">Place Order</string>
+    <string name="qty">Qty</string>
+    <string name="sampleOrderId">Order ID :1237663</string>
+    <string name="to">To</string>
+    <string name="sampleStatus">Ordered</string>
+    <string name="saveLocation">Save My Location</string>
+    <string name="updateProfile">Update Profile</string>
+    <string name="sampleRegisteredDate">Registered On 2025-12-02 10:02:56</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+</resources>
