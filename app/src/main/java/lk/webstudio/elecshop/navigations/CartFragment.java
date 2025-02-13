@@ -1,5 +1,6 @@
 package lk.webstudio.elecshop.navigations;
 
+
 import static android.content.ContentValues.TAG;
 
 import android.app.Activity;
@@ -16,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import lk.webstudio.elecshop.ConfirmActivity;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -28,9 +31,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import lk.payhere.androidsdk.PHConfigs;
 import lk.payhere.androidsdk.PHConstants;
@@ -41,6 +47,7 @@ import lk.payhere.androidsdk.model.StatusResponse;
 import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
 import lk.webstudio.elecshop.model.CartList;
+import lk.webstudio.elecshop.model.User;
 
 public class CartFragment extends Fragment {
     private final ArrayList<CartList> cartList = new ArrayList<>();
@@ -49,7 +56,8 @@ public class CartFragment extends Fragment {
     private FirebaseFirestore firestore;
     private double subTotal = 0.00;
     private TextView totalPrice;
-    private static final int PAYHERE_REQUEST = 1101;  // Define request code
+    User userList;
+    private static final int PAYHERE_REQUEST = 1101;
 
     private ActivityResultLauncher<Intent> paymentResultLauncher;
 
@@ -90,24 +98,74 @@ public class CartFragment extends Fragment {
         );
 
         Button placeOrderBtn = rootView.findViewById(R.id.placeBtn);
-        placeOrderBtn.setOnClickListener(v -> processPayment());
+        placeOrderBtn.setOnClickListener(v -> {
+            Intent i = new Intent(getContext(), ConfirmActivity.class);
+            startActivity(i);
+//            fetchUserDataAndProceedToPayment();
+        });
 
         return rootView;
     }
 
-    private void processPayment() {
+    private void fetchUserDataAndProceedToPayment() {
+        firestore.collection("user")
+                .whereEqualTo(FieldPath.documentId(), MainActivity.userLogId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        try {
+                            QuerySnapshot querySnapshot = task.getResult();
+                            for (QueryDocumentSnapshot qs : querySnapshot) {
+                                // Extract location object first
+                                Map<String, Object> location = (Map<String, Object>) qs.get("location");
+                                double latitude = 0.0;
+                                double longitude = 0.0;
+                                if (location != null) {
+                                    latitude = location.get("latitude") != null ? (double) location.get("latitude") : 0.0;
+                                    longitude = location.get("longitude") != null ? (double) location.get("longitude") : 0.0;
+                                }
+
+                                userList = new User(
+                                        qs.getString("firstName"),
+                                        qs.getString("lastName"),
+                                        qs.getString("email"),
+                                        qs.getString("mobile"),
+                                        qs.getString("password"),
+                                        qs.getString("registered_on"),
+                                        latitude,
+                                        longitude
+                                );
+                            }
+
+                            proceedToPayment();
+
+                        } catch (Exception e) {
+                            Log.e("ElecLog", "Error fetching user data: " + e.getMessage());
+                        }
+                    } else {
+                        Log.e("ElecLog", "Error fetching user data: " + task.getException());
+                    }
+                });
+    }
+
+    private void proceedToPayment() {
+
+
+        Random random = new Random();
+        int uniqueID = 100000 + random.nextInt(900000);
+
+cartAdapter.calculateSubtotal();
+        // Proceed with payment
         InitRequest req = new InitRequest();
-        req.setMerchantId("1221108");  // Merchant ID
-        req.setCurrency("LKR");        // Currency code
-        req.setAmount(1000.00);        // Final Amount
-        req.setOrderId("230000123");   // Unique Reference ID
-        req.setItemsDescription("Door bell wireless");
-        req.setCustom1("Custom message 1");
-        req.setCustom2("Custom message 2");
-        req.getCustomer().setFirstName("Saman");
-        req.getCustomer().setLastName("Perera");
-        req.getCustomer().setEmail("samanp@gmail.com");
-        req.getCustomer().setPhone("+94771234567");
+        req.setMerchantId("1221108");
+        req.setCurrency("LKR");
+        req.setAmount(subTotal);
+        req.setOrderId(String.valueOf(uniqueID));
+        req.setItemsDescription("Order"+uniqueID);
+        req.getCustomer().setFirstName(userList.getFirstName());
+        req.getCustomer().setLastName(userList.getLastName());
+        req.getCustomer().setEmail(userList.getEmail());
+        req.getCustomer().setPhone(userList.getMobile());
         req.getCustomer().getAddress().setAddress("No.1, Galle Road");
         req.getCustomer().getAddress().setCity("Colombo");
         req.getCustomer().getAddress().setCountry("Sri Lanka");
@@ -117,6 +175,7 @@ public class CartFragment extends Fragment {
         PHConfigs.setBaseUrl(PHConfigs.SANDBOX_URL);
         paymentResultLauncher.launch(intent);
     }
+
 
     public void fetchCartData() {
         firestore.collection("cart")
@@ -184,6 +243,7 @@ public class CartFragment extends Fragment {
     }
 }
 
+
 class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
     private final ArrayList<CartList> cartArrayList;
     private final TextView totalPrice;
@@ -238,12 +298,40 @@ class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
                 .error(R.drawable.product2)
                 .into(holder.productImage);
 
-        holder.cartDeleteBtn.setOnClickListener(v -> {
-            // Handle item removal from cart
-            cartArrayList.remove(position);
-            notifyItemRemoved(position);
-            calculateSubtotal();  // Recalculate subtotal after deletion
-            totalPrice.setText("Rs. " + String.format("%.2f", subTotal));
+        holder.cartDeleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                firestore.collection("cart")
+                        .whereEqualTo("user_id", MainActivity.userLogId)  // Match user ID
+                        .whereEqualTo("product_id", cartItem.getProduct_id())  // Match product ID
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    firestore.collection("cart")
+                                            .document(document.getId())
+                                            .delete()
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d("ElecLog", "Cart item removed successfully");
+                                                cartArrayList.remove(position);
+                                                notifyItemRemoved(position);
+                                                calculateSubtotal();  // Recalculate subtotal after deletion
+                                                totalPrice.setText("Rs. " + String.format("%.2f", subTotal));
+                                                Toast.makeText(v.getContext(), "Removed from cart", Toast.LENGTH_LONG).show();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("ElecLog", "Error removing item from cart", e);
+                                                Toast.makeText(v.getContext(), "Failed to remove", Toast.LENGTH_LONG).show();
+                                            });
+                                }
+                            } else {
+                                Log.e("ElecLog", "Error finding cart item", task.getException());
+                            }
+                        });
+
+
+            }
         });
     }
 

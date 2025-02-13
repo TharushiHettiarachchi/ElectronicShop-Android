@@ -85,12 +85,16 @@ public class HomeActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+
         fragmentTransaction.replace(R.id.fragmentContainerView1, HomeFragment.class, null);
+
         TextView tootlText = findViewById(R.id.toolbarTxt);
         tootlText.setText("Home");
-
+//
         fragmentTransaction.setReorderingAllowed(true);
         fragmentTransaction.commit();
+
+//        refreshHomeFragment();
 
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -123,5 +127,56 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("ElecLog", "Fragment onresume");
+        refreshHomeFragment();
+
+
+
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("ElecLog", "Fragment Onstart");
+
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("FragmentState", "Fragment onPause");
+
+    }
+
+    @Override
+    public void onStop() {
+        Log.d("FragmentState", "Fragment onStop");
+        super.onStop();
+    }
+
+
+    public void refreshHomeFragment() {
+      try {
+          HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
+          if (homeFragment != null) {
+              // Force refresh of the fragment
+              getSupportFragmentManager().beginTransaction()
+                      .detach(homeFragment) // Detach the fragment
+                      .attach(homeFragment) // Reattach it
+                      .commit();
+          } else {
+//              // If fragment is not present, add it again
+//              getSupportFragmentManager().beginTransaction()
+//                      .replace(R.id.fragmentContainerView1, new HomeFragment(), HomeFragment.class.getSimpleName())
+//                      .commit();
+          }
+      } catch (Exception e) {
+         Log.i("ElecLog",String.valueOf(e));
+      }
     }
 }

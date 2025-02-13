@@ -44,7 +44,11 @@
     <string name="qty">Qty</string>
     <string name="sampleOrderId">Order ID :1237663</string>
     <string name="to">To</string>
+    <string name="product">Product</string>
+    <string name="price">Price</string>
+    <string name="confirmOrder">Confirm Order</string>
     <string name="sampleStatus">Ordered</string>
+    <string name="orderConfirmation">Order Confirmation</string>
     <string name="saveLocation">Save My Location</string>
     <string name="updateProfile">Update Profile</string>
     <string name="sampleRegisteredDate">Registered On 2025-12-02 10:02:56</string>

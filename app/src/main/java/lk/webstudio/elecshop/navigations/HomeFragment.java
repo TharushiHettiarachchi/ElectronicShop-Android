@@ -3,6 +3,7 @@ package lk.webstudio.elecshop.navigations;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,7 +26,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -44,12 +44,12 @@ import lk.webstudio.elecshop.model.Product;
 
 public class HomeFragment extends Fragment {
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+
+        // Initialize the Spinner for categories
         Spinner spinner2 = rootView.findViewById(R.id.spinner2);
         FirebaseFirestore firestore2 = FirebaseFirestore.getInstance();
         firestore2
@@ -76,6 +76,28 @@ public class HomeFragment extends Fragment {
                     }
                 });
 
+        // Fetch product data from Firestore
+        fetchProductData(rootView);
+
+        return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("ElecLog", "Fragment onResume");
+        // Fetch product data again when returning to this fragment
+        fetchProductData(requireView());
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d("FragmentState", "Fragment onViewStateRestored");
+        fetchProductData(requireView());
+    }
+
+    public void fetchProductData(View rootView) {
         try {
             FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
@@ -181,12 +203,36 @@ public class HomeFragment extends Fragment {
         } catch (Exception e) {
             Log.e("ElecLog", "Error initializing Firebase", e);
         }
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d("ElecLog", "Fragment Onstart");
+        fetchProductData(getView());
+    }
 
-        return rootView;
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("FragmentState", "Fragment onPause");
+
+    }
+
+    @Override
+    public void onStop() {
+        Log.d("FragmentState", "Fragment onStop");
+        super.onStop();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.d("FragmentState", "Fragment onDetached");
     }
 }
 
+// Adapter for displaying products
 class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHolder> {
 
     private final ArrayList<Product> productArrayList;
@@ -229,31 +275,10 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
         holder.productPrice.setText("Rs. " + product.getPrice());
         holder.productQty.setText(product.getQuantity() + " Items");
 
+        // Handle status and UI updates for cart and wishlist
+        updateProductStatus(holder, product);
 
-        if (product.getStatus() == 0) {
-            holder.cartBtn.setEnabled(true);
-            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkOrange));
-           // holder.wishlistBtn.setEnabled(true);
-            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart));
-        } else if (product.getStatus() == 1) {
-            holder.cartBtn.setEnabled(false);
-            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
-           // holder.wishlistBtn.setEnabled(true);
-            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart));
-        } else if (product.getStatus() == 2) {
-            holder.cartBtn.setEnabled(true);
-            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkOrange));
-           // holder.wishlistBtn.setEnabled(false);
-            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart1));
-        }else if (product.getStatus() == 3) {
-            holder.cartBtn.setEnabled(false);
-            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
-           // holder.wishlistBtn.setEnabled(false);
-            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart1));
-        }
-
-
-
+        // Set image for product
         String imageUrl = product.getImage_url();
         if (imageUrl != null && imageUrl.startsWith("http://")) {
             imageUrl = imageUrl.replace("http://", "https://");
@@ -265,99 +290,90 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
                 .error(R.drawable.product2)
                 .into(holder.productImage);
 
-        holder.cartBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HashMap<String, Object> cartMap = new HashMap<>();
-                cartMap.put("product_id", product.getProduct_id());
-                cartMap.put("quantity", 1);
-                cartMap.put("user_id", MainActivity.userLogId);
+        // Cart button functionality
+        holder.cartBtn.setOnClickListener(v -> addToCart(v, product, holder));
 
-                FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                firestore
-                        .collection("cart")
-                        .add(cartMap)
-                        .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                if (task.isSuccessful()) {
-                                    holder.cartBtn.setEnabled(false);
-                                    holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
-                                    Toast.makeText(v.getContext(), "Added to Cart Successfully", Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(v.getContext(), "Something went wrong", Toast.LENGTH_LONG).show();
-                            }
-                        });
+        // Wishlist button functionality
+        holder.wishlistBtn.setOnClickListener(v -> handleWishlist(v, product, holder));
+    }
 
+    private void updateProductStatus(ProductViewHolder holder, Product product) {
+        if (product.getStatus() == 0) {
+            holder.cartBtn.setEnabled(true);
+            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkOrange));
+            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart));
+        } else if (product.getStatus() == 1) {
+            holder.cartBtn.setEnabled(false);
+            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
+            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart));
+        } else if (product.getStatus() == 2) {
+            holder.cartBtn.setEnabled(true);
+            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.darkOrange));
+            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart1));
+        } else if (product.getStatus() == 3) {
+            holder.cartBtn.setEnabled(false);
+            holder.cartBtn.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
+            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart1));
+        }
+    }
+
+    private void addToCart(View v, Product product, ProductViewHolder holder) {
+        HashMap<String, Object> cartMap = new HashMap<>();
+        cartMap.put("product_id", product.getProduct_id());
+        cartMap.put("quantity", 1);
+        cartMap.put("user_id", MainActivity.userLogId);
+
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore
+                .collection("cart")
+                .add(cartMap)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        holder.cartBtn.setEnabled(false);
+                        holder.cartBtn.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.gray));
+                        Toast.makeText(v.getContext(), "Added to cart", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("ElecLog", "Error adding to cart", task.getException());
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("ElecLog", "Error adding to cart", e));
+    }
+
+    private void handleWishlist(View v, Product product, ProductViewHolder holder) {
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        DocumentReference docRef = firestore.collection("wishlist")
+                .document(product.getProduct_id());
+
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    // Product is already in wishlist, remove it
+                    docRef.delete().addOnCompleteListener(deleteTask -> {
+                        if (deleteTask.isSuccessful()) {
+                            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(v.getContext(), R.drawable.heart));
+                            Toast.makeText(v.getContext(), "Removed from wishlist", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e("ElecLog", "Error removing from wishlist", deleteTask.getException());
+                        }
+                    });
+                } else {
+                    // Product is not in wishlist, add it
+                    docRef.set(new HashMap<String, Object>() {{
+                        put("product_id", product.getProduct_id());
+                        put("user_id", MainActivity.userLogId);
+                    }}).addOnCompleteListener(addTask -> {
+                        if (addTask.isSuccessful()) {
+                            holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(v.getContext(), R.drawable.heart1));
+                            Toast.makeText(v.getContext(), "Added to wishlist", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e("ElecLog", "Error adding to wishlist", addTask.getException());
+                        }
+                    });
+                }
+            } else {
+                Log.e("ElecLog", "Error checking wishlist", task.getException());
             }
         });
-
-        holder.wishlistBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               if(product.getStatus() == 0 || product.getStatus() == 1){
-                   HashMap<String, Object> wishlistMap = new HashMap<>();
-                   wishlistMap.put("product_id", product.getProduct_id());
-
-                   wishlistMap.put("user_id", MainActivity.userLogId);
-
-                   FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-                   firestore
-                           .collection("wishlist")
-                           .add(wishlistMap)
-                           .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                               @Override
-                               public void onComplete(@NonNull Task<DocumentReference> task) {
-                                   if (task.isSuccessful()) {
-                                       holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart1));
-
-                                       Toast.makeText(v.getContext(), "Added to Wishlist Successfully", Toast.LENGTH_LONG).show();
-                                   }
-                               }
-                           })
-                           .addOnFailureListener(new OnFailureListener() {
-                               @Override
-                               public void onFailure(@NonNull Exception e) {
-                                   Toast.makeText(v.getContext(), "Something went wrong", Toast.LENGTH_LONG).show();
-                               }
-                           });
-               }else{
-                   FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
-                   firestore.collection("wishlist")
-                           .whereEqualTo("user_id", MainActivity.userLogId)  // Match user ID
-                           .whereEqualTo("product_id", product.getProduct_id())  // Match product ID
-                           .get()
-                           .addOnCompleteListener(task -> {
-                               if (task.isSuccessful()) {
-                                   for (QueryDocumentSnapshot document : task.getResult()) {
-                                       firestore.collection("wishlist")
-                                               .document(document.getId()) // Delete the document by its ID
-                                               .delete()
-                                               .addOnSuccessListener(aVoid -> {
-                                                   Log.d("ElecLog", "Wishlist item removed successfully");
-                                                   holder.wishlistBtn.setImageDrawable(ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.heart));
-                                                   Toast.makeText(v.getContext(), "Removed from Wishlist", Toast.LENGTH_LONG).show();
-                                               })
-                                               .addOnFailureListener(e -> {
-                                                   Log.e("ElecLog", "Error removing item from wishlist", e);
-                                                   Toast.makeText(v.getContext(), "Failed to remove", Toast.LENGTH_LONG).show();
-                                               });
-                                   }
-                               } else {
-                                   Log.e("ElecLog", "Error finding wishlist item", task.getException());
-                               }
-                           });
-               }
-
-            }
-        });
-
     }
 
     @Override
