@@ -5,12 +5,14 @@ public class OrderList {
     private int productQty;
     private String productCode;
     private double productPrice;
+    private String image_url;
 
-    public OrderList(String productName, int productQty, String productCode, double productPrice) {
+    public OrderList(String productName, int productQty, String productCode, double productPrice, String image_url) {
         this.productName = productName;
         this.productQty = productQty;
         this.productCode = productCode;
         this.productPrice = productPrice;
+        this.image_url = image_url;
     }
 
     public String getProductName() {
@@ -43,5 +45,13 @@ public class OrderList {
 
     public void setProductPrice(double productPrice) {
         this.productPrice = productPrice;
+    }
+
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
     }
 }

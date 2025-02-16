@@ -122,7 +122,8 @@ public class ConfirmActivity extends AppCompatActivity {
                                                                 product.getString("product_name"),
                                                                 quantity,
                                                                 product.getString("product_code"),
-                                                                price
+                                                                price,
+                                                                product.getString("image_url")
                                                         ));
 
 
@@ -246,6 +247,7 @@ public class ConfirmActivity extends AppCompatActivity {
                     orderData.put("date_ordered", date);
                     orderData.put("order_id", uniqueID);
                     orderData.put("status", 1);
+                    orderData.put("products", orderDetailList);
 
 
                     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
@@ -256,74 +258,59 @@ public class ConfirmActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentReference> task) {
                                     Log.i("ElecLog", "Successfully order data added");
-                                    HashMap<String, Object> orderProductList = new HashMap<>();
-                                    orderProductList.put("order_id", uniqueID);
-                                    orderProductList.put("products", orderDetailList);
+                                    FirebaseFirestore firestore2 = FirebaseFirestore.getInstance();
+                                    for (CartList item : cartList) {
+                                        double availableQty = item.getQuantity_available();
+                                        double purchasedQty = item.getQuantity_ordered();
+                                        double remainingQty = item.getQuantity_available() - item.getQuantity_ordered();
 
-                                    FirebaseFirestore firebase1 = FirebaseFirestore.getInstance();
-                                    firebase1
-                                            .collection("order_items")
-                                            .add(orderProductList)
-                                            .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<DocumentReference> task) {
-                                                    Log.i("ElecLog", "Successfully order product data added");
-                                                    FirebaseFirestore firestore2 = FirebaseFirestore.getInstance();
-                                                    for (CartList item : cartList) {
-                                                        double availableQty = item.getQuantity_available();
-                                                        double purchasedQty = item.getQuantity_ordered();
-                                                        double remainingQty = item.getQuantity_available() - item.getQuantity_ordered();
+                                        firestore2
+                                                .collection("products")
+                                                .document(item.getProduct_id())
+                                                .update("quantity", remainingQty)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        Log.i("ElecLog", "Qty successfully changed");
+
 
                                                         firestore2
-                                                                .collection("products")
-                                                                .document(item.getProduct_id())
-                                                                .update("quantity", remainingQty)
-                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                .collection("cart")
+                                                                .whereEqualTo("product_id", item.getProduct_id())
+                                                                .whereEqualTo("user_id", item.getCustomer_id())
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                                     @Override
-                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                        Log.i("ElecLog", "Qty successfully changed");
-
-
-                                                                        firestore2
-                                                                                .collection("cart")
-                                                                                .whereEqualTo("product_id", item.getProduct_id())
-                                                                                .whereEqualTo("user_id", item.getCustomer_id())
-                                                                                .get()
-                                                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                                    @Override
-                                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                                        if (task.isSuccessful()) {
-                                                                                            try {
-                                                                                                QuerySnapshot querySnapshot = task.getResult();
-                                                                                                for (QueryDocumentSnapshot qs : querySnapshot) {
-                                                                                                    String cartId = qs.getId();
-                                                                                                    firestore2
-                                                                                                            .collection("cart")
-                                                                                                            .document(cartId)
-                                                                                                            .delete()
-                                                                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                @Override
-                                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                    Log.i("ElecLog", "Sucessfully removed");
-                                                                                                                }
-                                                                                                            });
+                                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            try {
+                                                                                QuerySnapshot querySnapshot = task.getResult();
+                                                                                for (QueryDocumentSnapshot qs : querySnapshot) {
+                                                                                    String cartId = qs.getId();
+                                                                                    firestore2
+                                                                                            .collection("cart")
+                                                                                            .document(cartId)
+                                                                                            .delete()
+                                                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                @Override
+                                                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                                                    Log.i("ElecLog", "Sucessfully removed");
                                                                                                 }
-                                                                                            } catch (
-                                                                                                    Exception e) {
-                                                                                                Log.e("ElecLog", String.valueOf(e));
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                });
-
+                                                                                            });
+                                                                                }
+                                                                            } catch (
+                                                                                    Exception e) {
+                                                                                Log.e("ElecLog", String.valueOf(e));
+                                                                            }
+                                                                        }
                                                                     }
                                                                 });
 
                                                     }
+                                                });
 
+                                    }
 
-                                                }
-                                            });
 
                                 }
                             });
@@ -338,8 +325,6 @@ public class ConfirmActivity extends AppCompatActivity {
                 // Inside the fragment:
                 Intent intent = new Intent(ConfirmActivity.this, HomeActivity.class);
                 startActivity(intent);
-
-
 
 
             } else if (resultCode == Activity.RESULT_CANCELED) {

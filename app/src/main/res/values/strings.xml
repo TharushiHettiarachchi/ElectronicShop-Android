@@ -52,6 +52,7 @@
     <string name="saveLocation">Save My Location</string>
     <string name="updateProfile">Update Profile</string>
     <string name="sampleRegisteredDate">Registered On 2025-12-02 10:02:56</string>
+    <string name="sampleDate">2025-12-02 10:02:56</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
