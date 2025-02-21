@@ -1,16 +1,19 @@
 package lk.webstudio.elecshop.model;
 
+import java.util.Date;
+
 public class User {
     private String firstName;
     private String lastName;
     private String email;
     private String mobile;
     private String password;
-    private String registeredDate;
+    private Date registeredDate;
     private double latitude;
     private double longitude;
+    private int status;
 
-    public User(String firstName, String lastName, String email, String mobile, String password, String registeredDate, double latitude, double longitude) {
+    public User(String firstName, String lastName, String email, String mobile, String password, Date registeredDate, double latitude, double longitude) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -61,11 +64,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRegisteredDate() {
+    public Date getRegisteredDate() {
         return registeredDate;
     }
 
-    public void setRegisteredDate(String registeredDate) {
+    public void setRegisteredDate(Date registeredDate) {
         this.registeredDate = registeredDate;
     }
 
@@ -84,6 +87,4 @@ public class User {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
-
 }

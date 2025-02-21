@@ -1,38 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout1"
+    android:id="@+id/drawer_layout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
     <!-- Content-->
     <LinearLayout
-        android:id="@+id/linear_layout1"
+        android:id="@+id/linear_layout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar1"
+            android:id="@+id/toolbar2"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:background="@color/lightOrange"
             android:gravity="center"
             android:paddingTop="28dp"
             app:titleTextColor="@color/darkOrange">
-            <ImageButton
-                android:id="@+id/imageButtonmenu"
-                android:layout_width="28dp"
-                android:layout_height="40dp"
-                android:background="@color/transparent"
-                android:src="@drawable/menuico"
-                app:layout_constraintBottom_toBottomOf="@+id/toolbarTxt"
-                app:layout_constraintTop_toTopOf="@+id/toolbarTxt"
-                android:layout_marginRight="8dp"
-                />
+
             <TextView
-                android:id="@+id/toolbarTxt"
+                android:id="@+id/toolbarTxt2"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:text="@string/menuItem3"
@@ -43,12 +34,12 @@
 
 
         <FrameLayout
-            android:id="@+id/frame_layout1"
+            android:id="@+id/frame_layout2"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/fragmentContainerView1"
+                android:id="@+id/fragmentContainerView2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
@@ -58,11 +49,11 @@
     </LinearLayout>
     <!--Content-->
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation_view1"
+        android:id="@+id/navigation_view2"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/navigation_menu"
+        app:menu="@menu/navigation_menu2"
         app:headerLayout="@layout/header_layout"
         app:itemIconTint="@color/darkOrange"
 

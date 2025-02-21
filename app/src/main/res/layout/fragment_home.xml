@@ -46,10 +46,10 @@
 
     <ImageButton
         android:id="@+id/imageButton5"
-        android:layout_width="44dp"
-        android:layout_height="40dp"
+        android:layout_width="28dp"
+        android:layout_height="30dp"
         android:background="@color/transparent"
-        android:src="@drawable/search"
+        android:src="@drawable/refresh"
         app:layout_constraintBottom_toBottomOf="@+id/spinner2"
         app:layout_constraintEnd_toEndOf="@+id/editTextText2"
         app:layout_constraintTop_toTopOf="@+id/spinner2" />

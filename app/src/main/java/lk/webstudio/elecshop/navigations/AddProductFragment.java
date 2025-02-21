@@ -69,19 +69,25 @@ public class AddProductFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            QuerySnapshot querySnapshot = task.getResult();
-                            String[] categories = new String[querySnapshot.size()];
-                            int i = 0;
-                            for (QueryDocumentSnapshot qs : querySnapshot) {
-                                categories[i] = qs.getString("category_name");
-                                i++;
-                            }
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-                                    requireContext(),
-                                    android.R.layout.simple_spinner_item,
-                                    categories
-                            );
-                            spinner.setAdapter(arrayAdapter);
+                           try {
+                               QuerySnapshot querySnapshot = task.getResult();
+                               String[] categories = new String[querySnapshot.size()+1];
+                               int i = 0;
+                               categories[i] = "Select";
+                               i=i+1;
+                               for (QueryDocumentSnapshot qs : querySnapshot) {
+                                   categories[i] = qs.getString("category_name");
+                                   i++;
+                               }
+                               ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                                       requireContext(),
+                                       android.R.layout.simple_spinner_item,
+                                       categories
+                               );
+                               spinner.setAdapter(arrayAdapter);
+                           } catch (Exception e) {
+                              Log.i("ElecLog",String.valueOf(e));
+                           }
                         }
                     }
                 });

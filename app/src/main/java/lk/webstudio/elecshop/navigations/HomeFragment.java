@@ -1,21 +1,28 @@
 package lk.webstudio.elecshop.navigations;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -24,84 +31,107 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
-import lk.webstudio.elecshop.HomeActivity;
 import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
 import lk.webstudio.elecshop.model.Product;
 
 
 public class HomeFragment extends Fragment {
+    Spinner spinner2;
+    EditText searchTxt;
+    ArrayList<Product> productList2;
+    ArrayList<Product> searchList;
+    ArrayList<Product> comboList;
+    RecyclerView recyclerView2;
+    String TypedTxt = "";
+    String selectedCombo = "Select";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        recyclerView2 = rootView.findViewById(R.id.recyclerView2);
+        spinner2 = rootView.findViewById(R.id.spinner2);
+        searchTxt = rootView.findViewById(R.id.editTextText2);
 
-        // Initialize the Spinner for categories
-        Spinner spinner2 = rootView.findViewById(R.id.spinner2);
-        FirebaseFirestore firestore2 = FirebaseFirestore.getInstance();
-        firestore2
-                .collection("product_category")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            QuerySnapshot querySnapshot = task.getResult();
-                            String[] categories = new String[querySnapshot.size()];
-                            int i = 0;
-                            for (QueryDocumentSnapshot qs : querySnapshot) {
-                                categories[i] = qs.getString("category_name");
-                                i++;
-                            }
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
-                                    requireContext(),
-                                    android.R.layout.simple_spinner_item,
-                                    categories
-                            );
-                            spinner2.setAdapter(arrayAdapter);
-                        }
-                    }
-                });
 
-        // Fetch product data from Firestore
+        loadSpinner();
         fetchProductData(rootView);
+
+
+        searchTxt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                TypedTxt = "";
+                TypedTxt = s.toString();
+
+
+                fetchProductData2();
+                searchProducts(TypedTxt, selectedCombo);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                fetchProductData2();
+
+            }
+        });
+
+        spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                String selectedText = parent.getItemAtPosition(position).toString();
+
+                selectedCombo = selectedText;
+                searchProducts(TypedTxt, selectedCombo);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+//                Log.e("ElecLog", "Selected:nothing ");
+            }
+        });
+
+
+        ImageButton imgBtn = rootView.findViewById(R.id.imageButton5);
+        imgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TypedTxt = "";
+                selectedCombo = "Select";
+                if (spinner2.getAdapter() != null && spinner2.getAdapter().getCount() > 1) {
+                    spinner2.setSelection(0);
+                }
+                searchTxt.setText("");
+                searchProducts(TypedTxt, selectedCombo);
+
+
+            }
+        });
 
         return rootView;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("ElecLog", "Fragment onResume");
-        // Fetch product data again when returning to this fragment
-        fetchProductData(requireView());
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        Log.d("FragmentState", "Fragment onViewStateRestored");
-        fetchProductData(requireView());
-    }
-
-    public void fetchProductData(View rootView) {
+    public void fetchProductData2() {
         try {
             FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
-            // Fetch all products
             firestore.collection("products").get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -109,11 +139,11 @@ public class HomeFragment extends Fragment {
                             if (productTask.isSuccessful()) {
                                 try {
                                     QuerySnapshot productSnapshot = productTask.getResult();
-                                    ArrayList<Product> productList2 = new ArrayList<>();
+                                    productList2 = new ArrayList<>();
                                     List<String> productIds = new ArrayList<>();
 
                                     for (QueryDocumentSnapshot qs : productSnapshot) {
-                                        String productId = qs.getId(); // Get product document ID
+                                        String productId = qs.getId();
                                         productIds.add(productId);
 
                                         productList2.add(new Product(
@@ -125,11 +155,12 @@ public class HomeFragment extends Fragment {
                                                 0,  // Default status (no cart, no wishlist)
                                                 qs.getString("user_id"),
                                                 qs.getString("date_added"),
-                                                qs.getString("image_url")
+                                                qs.getString("image_url"),
+                                                qs.getString("product_category")
                                         ));
                                     }
 
-                                    // Fetch cart items and wishlist items for the logged-in user
+
                                     firestore.collection("cart")
                                             .whereEqualTo("user_id", MainActivity.userLogId)
                                             .get()
@@ -156,7 +187,7 @@ public class HomeFragment extends Fragment {
                                                                         }
                                                                     }
 
-                                                                    // Update product status based on cart and wishlist data
+
                                                                     for (Product product : productList2) {
                                                                         boolean inCart = cartProductIds.contains(product.getProduct_id());
                                                                         boolean inWishlist = wishlistProductIds.contains(product.getProduct_id());
@@ -172,7 +203,106 @@ public class HomeFragment extends Fragment {
                                                                         }
                                                                     }
 
-                                                                    // Display updated products in RecyclerView
+
+                                                                } else {
+                                                                    Log.e("ElecLog", "Error fetching wishlist data", wishlistTask.getException());
+                                                                }
+                                                            });
+
+                                                } else {
+                                                    Log.e("ElecLog", "Error fetching cart data", cartTask.getException());
+                                                }
+                                            });
+
+                                } catch (Exception e) {
+                                    Log.e("ElecLog", "Error parsing products", e);
+                                }
+                            } else {
+                                Log.e("ElecLog", "Error fetching products", productTask.getException());
+                            }
+                        }
+                    });
+
+        } catch (Exception e) {
+            Log.e("ElecLog", "Error initializing Firebase", e);
+        }
+    }
+
+    public void fetchProductData(View rootView) {
+        try {
+            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+            firestore.collection("products").get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> productTask) {
+                            if (productTask.isSuccessful()) {
+                                try {
+                                    QuerySnapshot productSnapshot = productTask.getResult();
+                                    productList2 = new ArrayList<>();
+                                    List<String> productIds = new ArrayList<>();
+
+                                    for (QueryDocumentSnapshot qs : productSnapshot) {
+                                        String productId = qs.getId();
+                                        productIds.add(productId);
+
+                                        productList2.add(new Product(
+                                                qs.getId(),
+                                                qs.getString("product_code"),
+                                                qs.getString("product_name"),
+                                                qs.getLong("price") != null ? qs.getLong("price").intValue() : 0,
+                                                qs.getLong("quantity") != null ? qs.getLong("quantity").intValue() : 0,
+                                                0,  // Default status (no cart, no wishlist)
+                                                qs.getString("user_id"),
+                                                qs.getString("date_added"),
+                                                qs.getString("image_url"),
+                                                qs.getString("product_category")
+
+                                        ));
+                                    }
+
+
+                                    firestore.collection("cart")
+                                            .whereEqualTo("user_id", MainActivity.userLogId)
+                                            .get()
+                                            .addOnCompleteListener(cartTask -> {
+                                                if (cartTask.isSuccessful()) {
+                                                    List<String> cartProductIds = new ArrayList<>();
+                                                    for (QueryDocumentSnapshot cartDoc : cartTask.getResult()) {
+                                                        String cartProductId = cartDoc.getString("product_id");
+                                                        if (cartProductId != null) {
+                                                            cartProductIds.add(cartProductId);
+                                                        }
+                                                    }
+
+                                                    firestore.collection("wishlist")
+                                                            .whereEqualTo("user_id", MainActivity.userLogId)
+                                                            .get()
+                                                            .addOnCompleteListener(wishlistTask -> {
+                                                                if (wishlistTask.isSuccessful()) {
+                                                                    List<String> wishlistProductIds = new ArrayList<>();
+                                                                    for (QueryDocumentSnapshot wishlistDoc : wishlistTask.getResult()) {
+                                                                        String wishlistProductId = wishlistDoc.getString("product_id");
+                                                                        if (wishlistProductId != null) {
+                                                                            wishlistProductIds.add(wishlistProductId);
+                                                                        }
+                                                                    }
+
+
+                                                                    for (Product product : productList2) {
+                                                                        boolean inCart = cartProductIds.contains(product.getProduct_id());
+                                                                        boolean inWishlist = wishlistProductIds.contains(product.getProduct_id());
+
+                                                                        if (inCart && inWishlist) {
+                                                                            product.setStatus(3); // Added to both cart and wishlist
+                                                                        } else if (inCart) {
+                                                                            product.setStatus(1); // Added to cart, no wishlist
+                                                                        } else if (inWishlist) {
+                                                                            product.setStatus(2); // No cart, added to wishlist
+                                                                        } else {
+                                                                            product.setStatus(0); // No cart, no wishlist
+                                                                        }
+                                                                    }
+
                                                                     RecyclerView recyclerView2 = rootView.findViewById(R.id.recyclerView2);
                                                                     LinearLayoutManager layoutManager2 = new LinearLayoutManager(getContext());
                                                                     layoutManager2.setOrientation(RecyclerView.VERTICAL);
@@ -205,34 +335,83 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d("ElecLog", "Fragment Onstart");
-        fetchProductData(getView());
+    public void loadSpinner() {
+
+        FirebaseFirestore firestore2 = FirebaseFirestore.getInstance();
+        firestore2
+                .collection("product_category")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            try {
+                                QuerySnapshot querySnapshot = task.getResult();
+                                String[] categories = new String[querySnapshot.size() + 1];
+                                int i = 0;
+                                categories[i] = "Select";
+                                i = i + 1;
+                                for (QueryDocumentSnapshot qs : querySnapshot) {
+                                    categories[i] = qs.getString("category_name");
+                                    i++;
+                                }
+                                ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                                        requireContext(),
+                                        android.R.layout.simple_spinner_item,
+                                        categories
+                                );
+                                spinner2.setAdapter(arrayAdapter);
+                            } catch (Exception e) {
+                                Log.i("ElecLog", String.valueOf(e));
+                            }
+                        }
+                    }
+                });
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("FragmentState", "Fragment onPause");
+    public void searchProducts(String searchTxtValue, String searchComboValue) {
+        searchList = new ArrayList<>();
+        comboList = new ArrayList<>();
+        searchList.clear();
+        comboList.clear();
+        for (Product product : productList2) {
+            try {
 
+                if (product.getProduct_name().toLowerCase().contains(searchTxtValue) && searchComboValue.equals("Select")) {
+
+
+                    searchList.add(product);
+
+                } else if (!searchComboValue.equals("Select")) {
+
+
+                    if(product.getProduct_name().toLowerCase().contains(searchTxtValue) && product.getCategory().contains(searchComboValue)){
+
+                        searchList.add(product);
+                    }
+
+                }
+            } catch (Exception e) {
+                Log.i("ElecLog", String.valueOf(e));
+            }
+        }
+
+
+        LinearLayoutManager layoutManager2 = new LinearLayoutManager(getContext());
+        layoutManager2.setOrientation(RecyclerView.VERTICAL);
+        recyclerView2.setLayoutManager(layoutManager2);
+
+        ProductAdapter2 productAdapter2 = new ProductAdapter2(searchList);
+        recyclerView2.setAdapter(productAdapter2);
+
+
+//        Log.i("ElecLog", "----------------------------------------");
     }
 
-    @Override
-    public void onStop() {
-        Log.d("FragmentState", "Fragment onStop");
-        super.onStop();
-    }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Log.d("FragmentState", "Fragment onDetached");
-    }
 }
 
-// Adapter for displaying products
+
 class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHolder> {
 
     private final ArrayList<Product> productArrayList;
@@ -275,7 +454,7 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
         holder.productPrice.setText("Rs. " + product.getPrice());
         holder.productQty.setText(product.getQuantity() + " Items");
 
-        // Handle status and UI updates for cart and wishlist
+
         updateProductStatus(holder, product);
 
         // Set image for product
@@ -380,4 +559,7 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
     public int getItemCount() {
         return productArrayList.size();
     }
+
+
 }
+

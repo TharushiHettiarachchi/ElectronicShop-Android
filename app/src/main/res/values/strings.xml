@@ -18,6 +18,8 @@
     <string name="menuItem7">Products</string>
     <string name="menuItem8">Settings</string>
     <string name="menuItem9">Logout</string>
+    <string name="menuItem10">Dashboard</string>
+    <string name="menuItem11">Users</string>
     <string name="menuGroup1">Buyers</string>
     <string name="menuGroup2">Sellers</string>
     <string name="menuGroup3">Other</string>
@@ -42,9 +44,14 @@
     <string name="subTotal">Sub Total</string>
     <string name="placeOrder">Place Order</string>
     <string name="qty">Qty</string>
+    <string name="users">Users</string>
     <string name="sampleOrderId">Order ID :1237663</string>
     <string name="to">To</string>
+    <string name="count">12</string>
+    <string name="sellingsToday">Todays Sellings</string>
     <string name="product">Product</string>
+    <string name="annualSales">Annual Sales</string>
+    <string name="products">Products</string>
     <string name="price">Price</string>
     <string name="confirmOrder">Confirm Order</string>
     <string name="sampleStatus">Ordered</string>

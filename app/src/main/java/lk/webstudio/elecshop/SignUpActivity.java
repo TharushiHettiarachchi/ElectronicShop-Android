@@ -80,6 +80,8 @@ Date date = new Date();
                     userHashMap.put("email", email.getText().toString());
                     userHashMap.put("password", password.getText().toString());
                     userHashMap.put("registered_on", date);
+                    userHashMap.put("status", 1);
+
 
 
                     firestore
@@ -91,7 +93,7 @@ Date date = new Date();
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful()) {
                                         QuerySnapshot querySnapshot = task.getResult();
-                                        if (querySnapshot != null) {
+                                        if (!querySnapshot.isEmpty()) {
                                             Log.i("Electronic Shop", "User Already exist");
                                             Toast.makeText(SignUpActivity.this, "User Already Exist", Toast.LENGTH_LONG).show();
                                         } else {
@@ -101,6 +103,28 @@ Date date = new Date();
                                                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                         @Override
                                                         public void onSuccess(DocumentReference documentReference) {
+
+                                                            EmailSender.sendEmail(email.getText().toString(), "Welcome to Electronic Shop", "Dear "+firstName.getText().toString()+" "+lastName.getText().toString()+" ,\n" +
+                                                                            "\n" +
+                                                                            "\n" +
+                                                                            "Thank you for registering with ElecShop! We are thrilled to have you on board. Explore a wide range of electronic components, tools, and accessories tailored to meet all your project needs. Enjoy a seamless shopping experience, exclusive discounts, and fast delivery right to your doorstep. If you have any questions or need assistance, feel free to reach out to our support team at electronishoppvt@gmail.com.\n" +
+                                                                            "Happy shopping!\n" +
+                                                                            "The ElecShop Team",
+                                                                    new EmailSender.EmailCallback() {
+                                                                        @Override
+                                                                        public void onSuccess(String response) {
+                                                                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, "Success: " + response, Toast.LENGTH_LONG).show());
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onFailure(String error) {
+                                                                            runOnUiThread(() -> Toast.makeText(SignUpActivity.this, "Error: " + error, Toast.LENGTH_LONG).show());
+                                                                        }
+                                                                    });
+
+
+
+
                                                             Log.i("Electronic Shop", "User Successfully Registered");
                                                             Toast.makeText(SignUpActivity.this, "Registration Successful", Toast.LENGTH_LONG).show();
                                                             firstName.setText("");

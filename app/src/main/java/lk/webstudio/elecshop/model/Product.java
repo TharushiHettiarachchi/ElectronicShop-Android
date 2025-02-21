@@ -13,8 +13,9 @@ public class Product {
     private String user_id;
     private String date_added;
     private String image_url;
+    private String category;
 
-    public Product(String product_id, String product_code, String product_name, int price, int quantity, int status, String user_id, String date_added, String image_url) {
+    public Product(String product_id, String product_code, String product_name, int price, int quantity, int status, String user_id, String date_added, String image_url, String category) {
         this.product_id = product_id;
         this.product_code = product_code;
         this.product_name = product_name;
@@ -24,6 +25,7 @@ public class Product {
         this.user_id = user_id;
         this.date_added = date_added;
         this.image_url = image_url;
+        this.category = category;
     }
 
     public String getProduct_id() {
@@ -96,5 +98,13 @@ public class Product {
 
     public void setImage_url(String image_url) {
         this.image_url = image_url;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

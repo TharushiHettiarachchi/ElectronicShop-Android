@@ -37,6 +37,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
 
@@ -75,7 +78,9 @@ public class ProfileFragment extends Fragment {
                                     email.setText(qs.getString("email"));
                                     password.setText(qs.getString("password"));
                                     mobile.setText(qs.getString("mobile"));
-                                    profileDate.setText("Registered On " + qs.getString("registered_on"));
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                                    String formattedDate = sdf.format(qs.getDate("registered_on"));
+                                    profileDate.setText("Registered On " + formattedDate);
                                 }
 
                             } catch (Exception e) {
@@ -161,7 +166,7 @@ public class ProfileFragment extends Fragment {
                     Marker marker = mMap.addMarker(
                             new MarkerOptions()
                                     .position(currentLatLng)
-                                    .title("Package")
+                                    .title("Me")
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.myloc))
                                     .draggable(true) // Allow dragging
                     );
@@ -192,7 +197,7 @@ public class ProfileFragment extends Fragment {
                             mMap.addMarker(
                                     new MarkerOptions()
                                             .position(currentLatLng)
-                                            .title("Package")
+                                            .title("Me")
                                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.myloc))
                                             .draggable(true) // Allow dragging
                             );

@@ -63,7 +63,8 @@ public class ProductFragment extends Fragment {
                                                         qs.getLong("status") != null ? qs.getLong("status").intValue() : 0,
                                                         qs.getString("user_id"),
                                                         qs.getString("date_added"),
-                                                        qs.getString("image_url")
+                                                        qs.getString("image_url"),
+                                                        qs.getString("product_category")
                                                 )
                                         );
                                     }

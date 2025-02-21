@@ -22,9 +22,11 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import lk.webstudio.elecshop.R;
@@ -144,7 +146,10 @@ class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
         Orders orders = orderArrayList.get(position);
         holder.orderId.setText(orders.getOrderId());
-        holder.orderDate.setText(String.valueOf(orders.getDate()));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = sdf.format(orders.getDate());
+
+        holder.orderDate.setText(String.valueOf(formattedDate));
         String amount = "Rs. " + orders.getAmount();
 
         holder.orderAmount.setText(amount);

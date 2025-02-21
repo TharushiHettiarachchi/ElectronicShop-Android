@@ -6,6 +6,8 @@ import static android.content.ContentValues.TAG;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,7 +133,7 @@ public class CartFragment extends Fragment {
                                         qs.getString("email"),
                                         qs.getString("mobile"),
                                         qs.getString("password"),
-                                        qs.getString("registered_on"),
+                                        qs.getDate("registered_on"),
                                         latitude,
                                         longitude
                                 );
@@ -154,14 +156,14 @@ public class CartFragment extends Fragment {
         Random random = new Random();
         int uniqueID = 100000 + random.nextInt(900000);
 
-cartAdapter.calculateSubtotal();
+        cartAdapter.calculateSubtotal();
         // Proceed with payment
         InitRequest req = new InitRequest();
         req.setMerchantId("1221108");
         req.setCurrency("LKR");
         req.setAmount(subTotal);
         req.setOrderId(String.valueOf(uniqueID));
-        req.setItemsDescription("Order"+uniqueID);
+        req.setItemsDescription("Order" + uniqueID);
         req.getCustomer().setFirstName(userList.getFirstName());
         req.getCustomer().setLastName(userList.getLastName());
         req.getCustomer().setEmail(userList.getEmail());
@@ -286,6 +288,23 @@ class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
         holder.productName.setText(cartItem.getProduct_name());
         holder.productPrice.setText("Rs. " + cartItem.getPrice());
         holder.productQty.setText(String.valueOf(cartItem.getQuantity_ordered()));
+
+        holder.productQty.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         String imageUrl = cartItem.getImage_url();
         if (imageUrl != null && imageUrl.startsWith("http://")) {
