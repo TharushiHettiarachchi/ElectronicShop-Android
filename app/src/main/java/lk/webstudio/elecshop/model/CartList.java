@@ -10,9 +10,9 @@ public class CartList {
     private int quantity_ordered;
     private String customer_id;
     private String image_url;
+    private String cartID;
 
-
-    public CartList(String product_id, String product_code, String product_name, int price, int quantity_available, int quantity_ordered, String customer_id, String image_url) {
+    public CartList(String product_id, String product_code, String product_name, int price, int quantity_available, int quantity_ordered, String customer_id, String image_url, String cartID) {
         this.product_id = product_id;
         this.product_code = product_code;
         this.product_name = product_name;
@@ -21,6 +21,7 @@ public class CartList {
         this.quantity_ordered = quantity_ordered;
         this.customer_id = customer_id;
         this.image_url = image_url;
+        this.cartID = cartID;
     }
 
     public String getProduct_id() {
@@ -85,5 +86,13 @@ public class CartList {
 
     public void setImage_url(String image_url) {
         this.image_url = image_url;
+    }
+
+    public String getCartID() {
+        return cartID;
+    }
+
+    public void setCartID(String cartID) {
+        this.cartID = cartID;
     }
 }

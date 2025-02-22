@@ -1,8 +1,10 @@
 package lk.webstudio.elecshop.navigations;
 
 import static androidx.core.content.ContextCompat.getSystemService;
+import static androidx.core.content.ContextCompat.startActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -44,6 +46,7 @@ import java.util.List;
 
 import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
+import lk.webstudio.elecshop.SingleProductActivity;
 import lk.webstudio.elecshop.model.Product;
 
 
@@ -474,6 +477,17 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
 
         // Wishlist button functionality
         holder.wishlistBtn.setOnClickListener(v -> handleWishlist(v, product, holder));
+
+        holder.productImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(v.getContext(), SingleProductActivity.class);
+                i.putExtra("productID",String.valueOf(product.getProduct_id()));
+                v.getContext().startActivity(i);
+            }
+        });
+
+
     }
 
     private void updateProductStatus(ProductViewHolder holder, Product product) {
@@ -554,6 +568,8 @@ class ProductAdapter2 extends RecyclerView.Adapter<ProductAdapter2.ProductViewHo
             }
         });
     }
+
+
 
     @Override
     public int getItemCount() {

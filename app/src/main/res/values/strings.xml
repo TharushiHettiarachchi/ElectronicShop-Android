@@ -6,6 +6,8 @@
     <string name="lastName">Last Name</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="addToCart">Add to Cart</string>
+    <string name="addToWishlist">Add to Wishlist</string>
     <string name="mobile">Mobile Number</string>
     <string name="link1">Already have an account? Sign In</string>
     <string name="link2">Don\'t have an account? Sign Up</string>
@@ -24,6 +26,8 @@
     <string name="menuGroup2">Sellers</string>
     <string name="menuGroup3">Other</string>
     <string name="search">Search</string>
+    <string name="todaysOrders">Today\'s Orders</string>
+    <string name="viewAllSelling">View All Sellings</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="searchTxt">Search Products</string>
@@ -54,7 +58,10 @@
     <string name="products">Products</string>
     <string name="price">Price</string>
     <string name="confirmOrder">Confirm Order</string>
+    <string name="userAdded">Added by Tharushi Hettiarachchi</string>
+    <string name="dateAdded">Added on 2022-12-12</string>
     <string name="sampleStatus">Ordered</string>
+    <string name="sampleCategory">Sensors</string>
     <string name="orderConfirmation">Order Confirmation</string>
     <string name="saveLocation">Save My Location</string>
     <string name="updateProfile">Update Profile</string>

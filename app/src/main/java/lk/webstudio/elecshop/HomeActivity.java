@@ -4,18 +4,26 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.NotificationCompat;
@@ -37,18 +45,21 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lk.webstudio.elecshop.model.Product;
 import lk.webstudio.elecshop.navigations.CartFragment;
 import lk.webstudio.elecshop.navigations.HomeFragment;
 import lk.webstudio.elecshop.navigations.LogoutFragment;
+import lk.webstudio.elecshop.navigations.OrdersFragment;
 import lk.webstudio.elecshop.navigations.ProductFragment;
 import lk.webstudio.elecshop.navigations.ProfileFragment;
 import lk.webstudio.elecshop.navigations.PurchasedItemFragment;
 import lk.webstudio.elecshop.navigations.WishlistFragment;
 
 public class HomeActivity extends AppCompatActivity {
+    boolean isPortrait = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +71,58 @@ public class HomeActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
+//        for(Sensor sensor :sensorList){
+//            Log.i("ElecLog",sensor.getName());
+//        }
+
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            Log.i("ElecLog", "Have ");
+
+            Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            SensorEventListener listener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    float values[] = event.values;
+
+
+                    if ((values[0] < -4 || values[0] > 4) && isPortrait && values[1] < 2) {
+
+                        isPortrait = false;
+                        Log.i("ElecLog", "Landscape");
+                        Toast.makeText(HomeActivity.this,"Does not Support Landscape",Toast.LENGTH_LONG).show();
+//                        Log.i("ElecLog", String.valueOf(values[0]));
+//                        Log.i("ElecLog", String.valueOf(values[1]));
+//                        Log.i("ElecLog", "--------------------------------");
+
+
+                    } else if ((values[0] >= -4 && values[0] <= 4) && !isPortrait) {
+                        isPortrait = true;
+//                        Log.i("ElecLog", "Potriat");
+//                        Log.i("ElecLog", String.valueOf(values[0]));
+//                        Log.i("ElecLog", String.valueOf(values[1]));
+//                        Log.i("ElecLog", "--------------------------------");
+
+                    }
+
+
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            };
+            sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+
+        } else {
+            Log.i("ElecLog", "No ");
+        }
+
+
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout1);
         Toolbar toolbar = findViewById(R.id.toolbar1);
         FrameLayout frameLayout = findViewById(R.id.frame_layout1);
@@ -96,7 +159,7 @@ public class HomeActivity extends AppCompatActivity {
                                         }
 
 
-                                        Intent intent = new Intent(HomeActivity.this,HomeActivity.class );
+                                        Intent intent = new Intent(HomeActivity.this, HomeActivity.class);
                                         intent.putExtra("openProfileFragment", true);
                                         PendingIntent pendingIntent = PendingIntent.getActivity(
                                                 HomeActivity.this,
@@ -141,9 +204,6 @@ public class HomeActivity extends AppCompatActivity {
                                     }
 
 
-
-
-
                                 }
                             } catch (RuntimeException e) {
                                 Log.i("ElecLog", String.valueOf(e));
@@ -154,44 +214,45 @@ public class HomeActivity extends AppCompatActivity {
 
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-
-
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentContainerView1, HomeFragment.class, null);
+        fragmentTransaction.setReorderingAllowed(true);
+        fragmentTransaction.commit();
         TextView tootlText = findViewById(R.id.toolbarTxt);
         tootlText.setText("Home");
 
 
-
-        if (savedInstanceState == null) { // Avoid reloading on rotation
-            if (getIntent().getBooleanExtra("openProfileFragment", false)) {
-                // Open ProfileFragment when coming from the notification
-                fragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView1,  ProfileFragment.class,null)
-                        .setReorderingAllowed(true)
-                        .commit();
-                tootlText.setText("Profile");
-            } else {
-                // Default: Open HomeFragment
-               fragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainerView1,  HomeFragment.class,null)
-                       .setReorderingAllowed(true)
-                        .commit();
+        try {
+            if (savedInstanceState == null) {
+                if (getIntent().getBooleanExtra("openProfileFragment", false)) {
+                    // Open ProfileFragment when coming from the notification
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerView1, ProfileFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .commit();
+                    tootlText.setText("Profile");
+                } else {
+                    // Default: Open HomeFragment
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragmentContainerView1, HomeFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .commit();
+                }
             }
+        } catch (Exception e) {
+            Log.i("ElecLog", String.valueOf(e));
         }
-
-
-
-
 
 
         ImageButton imgMenuBtn = findViewById(R.id.imageButtonmenu);
         imgMenuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-                drawerLayout.close();
-              }else{
-                  drawerLayout.open();
-              }
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.close();
+                } else {
+                    drawerLayout.open();
+                }
             }
         });
 
@@ -203,45 +264,26 @@ public class HomeActivity extends AppCompatActivity {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (item.toString().equals("Home")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  HomeFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, HomeFragment.class, null);
                 } else if (item.toString().equals("Profile")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  ProfileFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, ProfileFragment.class, null);
                 } else if (item.toString().equals("Products")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  ProductFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, ProductFragment.class, null);
                 } else if (item.toString().equals("Cart")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  CartFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
-                }else if (item.toString().equals("Wishlist")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  WishlistFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
-                }else if (item.toString().equals("Purchased Items")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  PurchasedItemFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
-                }else if (item.toString().equals("Logout")) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragmentContainerView1,  LogoutFragment.class,null)
-                            .setReorderingAllowed(true)
-                            .commit();
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, CartFragment.class, null);
+                } else if (item.toString().equals("Wishlist")) {
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, WishlistFragment.class, null);
+                } else if (item.toString().equals("Purchased Items")) {
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, PurchasedItemFragment.class, null);
+                } else if (item.toString().equals("Logout")) {
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, LogoutFragment.class, null);
+                }else if (item.toString().equals("Orders")) {
+                    fragmentTransaction.replace(R.id.fragmentContainerView1, OrdersFragment.class, null);
                 }
 
                 tootlText.setText(item.toString());
-//                fragmentTransaction.setReorderingAllowed(true);
-//                fragmentTransaction.commit();
+                fragmentTransaction.setReorderingAllowed(true);
+                fragmentTransaction.commit();
                 drawerLayout.close();
 
                 return true;
@@ -249,9 +291,6 @@ public class HomeActivity extends AppCompatActivity {
         });
 
     }
-
-
-
 
 
 }

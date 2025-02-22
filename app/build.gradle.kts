@@ -71,7 +71,7 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
     implementation ("com.github.PayHereDevs:payhere-android-sdk:v3.0.17")
-    implementation ("androidx.appcompat:appcompat:1.6.0") // ignore if you have already added
+    implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation ("com.google.code.gson:gson:2.8.0") // ignore if you have already added
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation ("com.google.android.gms:play-services-location:21.3.0")

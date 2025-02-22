@@ -116,7 +116,8 @@ public class ConfirmActivity extends AppCompatActivity {
                                                                 product.getLong("quantity") != null ? product.getLong("quantity").intValue() : 0,
                                                                 quantity,
                                                                 cartItem.getString("user_id"),
-                                                                product.getString("image_url")
+                                                                product.getString("image_url"),
+                                                                cartItem.getId()
                                                         ));
                                                         orderDetailList.add(new OrderList(
                                                                 product.getString("product_name"),
@@ -365,8 +366,9 @@ class ConfirmAdapter extends RecyclerView.Adapter<ConfirmAdapter.ConfirmViewHold
     @Override
     public void onBindViewHolder(@NonNull ConfirmViewHolder holder, int position) {
         CartList cartList = confirmArrayList.get(position);
+        double  price = cartList.getPrice() * cartList.getQuantity_ordered();
         holder.productName.setText(cartList.getProduct_name());
-        holder.productPrice.setText("Rs. " + cartList.getPrice());
+        holder.productPrice.setText("Rs. " + price);
         holder.productQty.setText(String.valueOf(cartList.getQuantity_ordered()));
     }
 
