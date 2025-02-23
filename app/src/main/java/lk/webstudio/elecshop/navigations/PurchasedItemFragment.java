@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
 import lk.webstudio.elecshop.model.Orders;
 import lk.webstudio.elecshop.model.OrdersProducts;
@@ -47,6 +48,7 @@ public class PurchasedItemFragment extends Fragment {
 
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         firestore.collection("orders")
+                .whereEqualTo("customer_id", MainActivity.userLogId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {

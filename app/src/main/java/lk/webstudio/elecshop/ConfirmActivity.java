@@ -1,7 +1,7 @@
 package lk.webstudio.elecshop;
 
-import static android.app.PendingIntent.getActivity;
-import static android.content.ContentValues.TAG;
+
+
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
+
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -23,7 +23,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -48,15 +48,15 @@ import lk.payhere.androidsdk.model.InitRequest;
 import lk.payhere.androidsdk.model.StatusResponse;
 import lk.webstudio.elecshop.model.CartList;
 import lk.webstudio.elecshop.model.OrderList;
-import lk.webstudio.elecshop.model.Product;
+
 import lk.webstudio.elecshop.model.User;
-import lk.webstudio.elecshop.navigations.HomeFragment;
+
 
 
 public class ConfirmActivity extends AppCompatActivity {
 
-    private static final int PAYHERE_REQUEST = 11010;  // Define the request code
-    private TextView textView;  // Declare the TextView
+    private static final int PAYHERE_REQUEST = 11010;
+    private TextView textView;
     private final ArrayList<CartList> cartList = new ArrayList<>();
     private final ArrayList<OrderList> orderDetailList = new ArrayList<>();
     User userList;
@@ -69,7 +69,7 @@ public class ConfirmActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_confirm);
 
-        // Ensure 'main' layout exists
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -159,7 +159,7 @@ public class ConfirmActivity extends AppCompatActivity {
                                                                     try {
                                                                         QuerySnapshot querySnapshot = task.getResult();
                                                                         for (QueryDocumentSnapshot qs : querySnapshot) {
-                                                                            // Extract location object first
+
                                                                             Map<String, Object> location = (Map<String, Object>) qs.get("location");
                                                                             double latitude = 0.0;
                                                                             double longitude = 0.0;
@@ -241,7 +241,7 @@ public class ConfirmActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 if (response != null && response.isSuccess()) {
                     String msg = "Activity result: " + response.getData().toString();
-                    Log.d(TAG, msg);
+                    Log.d("ElecLog", msg);
                     Log.i("ElecLog", msg);
                     Date date = new Date();
                     HashMap<String, Object> orderData = new HashMap<>();
@@ -321,11 +321,11 @@ public class ConfirmActivity extends AppCompatActivity {
 
                 } else {
                     String msg = "Result: " + (response != null ? response.toString() : "no response");
-                    Log.d(TAG, msg);
-                    Log.i("ElecLog", msg);
+                    Log.d("ElecLog", msg);
+
 
                 }
-                // Inside the fragment:
+
                 Intent intent = new Intent(ConfirmActivity.this, HomeActivity.class);
                 startActivity(intent);
 

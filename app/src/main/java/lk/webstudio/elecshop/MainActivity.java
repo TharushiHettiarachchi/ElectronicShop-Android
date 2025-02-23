@@ -4,8 +4,11 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +46,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        BroadcastCheck broadcastCheck = new BroadcastCheck();
+        IntentFilter intentFilter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
+        registerReceiver(broadcastCheck,intentFilter);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (isGpsEnabled || isNetworkEnabled) {
+            // Location is ON
+           Log.i("ElecLog","Location ON");
+        } else {
+            // Location is OFF
+            Log.i("ElecLog","Location OFF");
+            Toast.makeText(MainActivity.this,"Please Turn on Location",Toast.LENGTH_LONG).show();
+        }
+
+
+
+
         SharedPreferences sharedPreferences = getSharedPreferences("lk.webstudio.elecshop.userlist", MODE_PRIVATE);
         String savedEmail = sharedPreferences.getString("email", null);
         String savedId = sharedPreferences.getString("id", null);
@@ -61,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            // Close MainActivity so user cannot go back to login screen
+
         }
 
 
@@ -114,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                                                     editor.putString("id", qs.getId().toString());
                                                     editor.apply();
                                                     userLogId = qs.getId();
-                                                    Log.i("Electronic Shop", "User Login Successful");
+                                                    Log.i("ElecLog", "User Login Successful");
                                                     Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_LONG).show();
                                                     email.setText("");
                                                     password.setText("");
@@ -128,17 +151,17 @@ public class MainActivity extends AppCompatActivity {
                                                     }
 
                                                 } else {
-                                                    Log.i("Electronic Shop", "Invalid Password");
+                                                    Log.i("ElecLog", "Invalid Password");
                                                     Toast.makeText(MainActivity.this, "Invalid Password", Toast.LENGTH_LONG).show();
                                                 }
 
                                             }
                                         } else {
-                                            Log.i("Electronic Shop", "Email Not Found");
+                                            Log.i("ElecLog", "Email Not Found");
                                             Toast.makeText(MainActivity.this, "Email Not Found", Toast.LENGTH_LONG).show();
                                         }
                                     } else {
-                                        Log.i("Electronic Shop", "Something went wrong");
+                                        Log.i("ElecLog", "Something went wrong");
                                         Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
                                     }
                                 }

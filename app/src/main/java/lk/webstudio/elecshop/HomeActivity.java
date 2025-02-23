@@ -74,9 +74,6 @@ public class HomeActivity extends AppCompatActivity {
 
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
-//        for(Sensor sensor :sensorList){
-//            Log.i("ElecLog",sensor.getName());
-//        }
 
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             Log.i("ElecLog", "Have ");
@@ -93,17 +90,12 @@ public class HomeActivity extends AppCompatActivity {
                         isPortrait = false;
                         Log.i("ElecLog", "Landscape");
                         Toast.makeText(HomeActivity.this,"Does not Support Landscape",Toast.LENGTH_LONG).show();
-//                        Log.i("ElecLog", String.valueOf(values[0]));
-//                        Log.i("ElecLog", String.valueOf(values[1]));
-//                        Log.i("ElecLog", "--------------------------------");
+
 
 
                     } else if ((values[0] >= -4 && values[0] <= 4) && !isPortrait) {
                         isPortrait = true;
-//                        Log.i("ElecLog", "Potriat");
-//                        Log.i("ElecLog", String.valueOf(values[0]));
-//                        Log.i("ElecLog", String.valueOf(values[1]));
-//                        Log.i("ElecLog", "--------------------------------");
+
 
                     }
 
@@ -225,14 +217,14 @@ public class HomeActivity extends AppCompatActivity {
         try {
             if (savedInstanceState == null) {
                 if (getIntent().getBooleanExtra("openProfileFragment", false)) {
-                    // Open ProfileFragment when coming from the notification
+
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainerView1, ProfileFragment.class, null)
                             .setReorderingAllowed(true)
                             .commit();
                     tootlText.setText("Profile");
                 } else {
-                    // Default: Open HomeFragment
+
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragmentContainerView1, HomeFragment.class, null)
                             .setReorderingAllowed(true)

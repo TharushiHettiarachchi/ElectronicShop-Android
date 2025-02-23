@@ -12,6 +12,7 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
     <style name="Theme.ElecShop.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.ElecShop.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

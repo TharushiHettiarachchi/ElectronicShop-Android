@@ -212,6 +212,7 @@ class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.UserOrder
             productQty = itemView.findViewById(R.id.textView67);
             productImage = itemView.findViewById(R.id.imageView15);
             viewBtn = itemView.findViewById(R.id.button49);
+
         }
     }
 
@@ -263,6 +264,7 @@ class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.UserOrder
                     TextView alertProductTotalPrice = dialogView.findViewById(R.id.textView81);
                     TextView alertProductCustomer = dialogView.findViewById(R.id.textView83);
                     Button callBtn = dialogView.findViewById(R.id.button4);
+
 
                     alertProductName.setText(userOrder.getProductName());
                     alertProductCode.setText(userOrder.getProductCode());

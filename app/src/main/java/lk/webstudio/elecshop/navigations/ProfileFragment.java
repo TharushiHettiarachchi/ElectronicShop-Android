@@ -1,8 +1,12 @@
 package lk.webstudio.elecshop.navigations;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,6 +44,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import lk.webstudio.elecshop.BroadcastCheck;
+import lk.webstudio.elecshop.HomeActivity;
 import lk.webstudio.elecshop.MainActivity;
 import lk.webstudio.elecshop.R;
 
@@ -54,92 +60,113 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        EditText fname = rootView.findViewById(R.id.profileFname);
-        EditText lname = rootView.findViewById(R.id.profileLname);
-        EditText mobile = rootView.findViewById(R.id.profileMobile);
-        EditText email = rootView.findViewById(R.id.profileEmail);
-        EditText password = rootView.findViewById(R.id.profilePassword);
-        TextView profileDate = rootView.findViewById(R.id.profileRegisteredDate);
+        BroadcastCheck broadcastCheck = new BroadcastCheck();
+        IntentFilter intentFilter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
+        rootView.getContext().registerReceiver(broadcastCheck,intentFilter);
+        LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
 
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        firestore.collection("user")
-                .whereEqualTo(FieldPath.documentId(), MainActivity.userLogId)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            try {
-                                QuerySnapshot querySnapshot = task.getResult();
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-                                for (QueryDocumentSnapshot qs : querySnapshot) {
-                                    fname.setText(qs.getString("firstName"));
-                                    lname.setText(qs.getString("lastName"));
-                                    email.setText(qs.getString("email"));
-                                    password.setText(qs.getString("password"));
-                                    mobile.setText(qs.getString("mobile"));
-                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                                    String formattedDate = sdf.format(qs.getDate("registered_on"));
-                                    profileDate.setText("Registered On " + formattedDate);
+        if (isGpsEnabled || isNetworkEnabled) {
+            // Location is ON
+            Log.i("ElecLog","Location ON");
+            EditText fname = rootView.findViewById(R.id.profileFname);
+            EditText lname = rootView.findViewById(R.id.profileLname);
+            EditText mobile = rootView.findViewById(R.id.profileMobile);
+            EditText email = rootView.findViewById(R.id.profileEmail);
+            EditText password = rootView.findViewById(R.id.profilePassword);
+            TextView profileDate = rootView.findViewById(R.id.profileRegisteredDate);
+
+            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+            firestore.collection("user")
+                    .whereEqualTo(FieldPath.documentId(), MainActivity.userLogId)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                try {
+                                    QuerySnapshot querySnapshot = task.getResult();
+
+                                    for (QueryDocumentSnapshot qs : querySnapshot) {
+                                        fname.setText(qs.getString("firstName"));
+                                        lname.setText(qs.getString("lastName"));
+                                        email.setText(qs.getString("email"));
+                                        password.setText(qs.getString("password"));
+                                        mobile.setText(qs.getString("mobile"));
+                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                                        String formattedDate = sdf.format(qs.getDate("registered_on"));
+                                        profileDate.setText("Registered On " + formattedDate);
+                                    }
+
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
                                 }
-
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
                             }
                         }
+                    });
+
+            // Initialize FusedLocationProviderClient
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+            // Load the map
+            mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapLayout);
+            if (mapFragment == null) {
+                mapFragment = new SupportMapFragment();
+                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.mapLayout, mapFragment).commit();
+            }
+
+            mapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(@NonNull GoogleMap googleMap) {
+                    Log.i("ElecLog", "Map Ready");
+                    mMap = googleMap;
+
+                    // Check and request permissions
+                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mMap.setMyLocationEnabled(true);
+                        getCurrentLocation();
+
+
+
+                    } else {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
                     }
-                });
+                }
+            });
 
-        // Initialize FusedLocationProviderClient
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+            Button saveLocationBtn = rootView.findViewById(R.id.saveLocBtn);
+            saveLocationBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+                    firestore
+                            .collection("user")
+                            .document(MainActivity.userLogId)
+                            .update("location",currentLatLng)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(requireContext(),"Succesfully saved",Toast.LENGTH_LONG).show();
+                                }
+                            });
 
-        // Load the map
-        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapLayout);
-        if (mapFragment == null) {
-            mapFragment = new SupportMapFragment();
-            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.mapLayout, mapFragment).commit();
+
+                }
+            });
+        } else {
+            // Location is OFF
+            Log.i("ElecLog","Location OFF");
+            Toast.makeText(requireContext(),"Please Turn on Location",Toast.LENGTH_LONG).show();
+            Intent i = new Intent(requireContext(), HomeActivity.class);
+            startActivity(i);
         }
 
-        mapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull GoogleMap googleMap) {
-                Log.i("ElecLog", "Map Ready");
-                mMap = googleMap;
-
-                // Check and request permissions
-                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    mMap.setMyLocationEnabled(true);
-                    getCurrentLocation();
 
 
-
-                } else {
-                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
-                }
-            }
-        });
-
-        Button saveLocationBtn = rootView.findViewById(R.id.saveLocBtn);
-        saveLocationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-                firestore
-                        .collection("user")
-                        .document(MainActivity.userLogId)
-                        .update("location",currentLatLng)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Toast.makeText(requireContext(),"Succesfully saved",Toast.LENGTH_LONG).show();
-                            }
-                        });
-
-
-            }
-        });
 
         return rootView;
     }

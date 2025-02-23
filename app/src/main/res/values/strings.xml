@@ -52,6 +52,9 @@
     <string name="placeOrder">Place Order</string>
     <string name="qty">Qty</string>
     <string name="users">Users</string>
+    <string name="callSeller">Call Seller</string>
+    <string name="productId">Product ID</string>
+    <string name="status">Status</string>
     <string name="sampleOrderId">Order ID :1237663</string>
     <string name="sampleOrderIds">1237663</string>
     <string name="cancel">Cancel</string>

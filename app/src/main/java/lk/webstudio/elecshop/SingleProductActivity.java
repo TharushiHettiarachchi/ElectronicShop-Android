@@ -1,7 +1,7 @@
 package lk.webstudio.elecshop;
 
 import android.content.Intent;
-import android.graphics.Color;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,12 +25,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
 
-import lk.webstudio.elecshop.model.Product;
+import java.util.HashMap;
+
 
 public class SingleProductActivity extends AppCompatActivity {
 

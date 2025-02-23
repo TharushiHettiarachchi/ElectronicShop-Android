@@ -25,7 +25,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+
 
 import lk.webstudio.elecshop.model.User;
 

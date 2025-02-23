@@ -82,6 +82,9 @@ dependencies {
     implementation ("com.sun.mail:android-mail:1.6.2")
     implementation ("com.sun.mail:android-activation:1.6.2")
 
+    implementation ("androidx.fragment:fragment:1.5.0") // or the latest version
+    implementation ("androidx.appcompat:appcompat:1.5.0") // or the latest version
+
 
 
 
