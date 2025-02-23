@@ -12,8 +12,9 @@ public class User {
     private double latitude;
     private double longitude;
     private int status;
+    private String userId;
 
-    public User(String firstName, String lastName, String email, String mobile, String password, Date registeredDate, double latitude, double longitude) {
+    public User(String firstName, String lastName, String email, String mobile, String password, Date registeredDate, double latitude, double longitude, int status, String userId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -22,6 +23,8 @@ public class User {
         this.registeredDate = registeredDate;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.status = status;
+        this.userId = userId;
     }
 
     public String getFirstName() {
@@ -86,5 +89,21 @@ public class User {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

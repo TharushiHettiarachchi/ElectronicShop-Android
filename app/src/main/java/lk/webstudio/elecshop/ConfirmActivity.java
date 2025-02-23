@@ -176,7 +176,9 @@ public class ConfirmActivity extends AppCompatActivity {
                                                                                     qs.getString("password"),
                                                                                     qs.getDate("registered_on"),
                                                                                     latitude,
-                                                                                    longitude
+                                                                                    longitude,
+                                                                                   Integer.parseInt( String.valueOf(qs.getLong("status"))),
+                                                                                    qs.getId()
                                                                             );
                                                                         }
 

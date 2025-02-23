@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class EmailSender {
 
-    private static final String SERVER_URL = "https://1301-112-134-196-193.ngrok-free.app/ElectronicShop/SendEmail";
+    private static final String SERVER_URL = "https://e025-112-134-196-193.ngrok-free.app/ElectronicShop/SendEmail";
 
     public static void sendEmail(String email, String subject, String content, EmailCallback callback) {
         OkHttpClient client = new OkHttpClient();

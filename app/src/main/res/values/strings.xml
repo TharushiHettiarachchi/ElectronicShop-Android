@@ -26,6 +26,9 @@
     <string name="menuGroup2">Sellers</string>
     <string name="menuGroup3">Other</string>
     <string name="search">Search</string>
+    <string name="view">View</string>
+    <string name="orderId">Order ID</string>
+    <string name="allOrders">All Orders</string>
     <string name="todaysOrders">Today\'s Orders</string>
     <string name="viewAllSelling">View All Sellings</string>
     <string name="edit">Edit</string>
@@ -50,7 +53,14 @@
     <string name="qty">Qty</string>
     <string name="users">Users</string>
     <string name="sampleOrderId">Order ID :1237663</string>
+    <string name="sampleOrderIds">1237663</string>
+    <string name="cancel">Cancel</string>
+    <string name="readyForDelivery">Ready for Delivery</string>
+    <string name="callCustomer">Call Customer</string>
     <string name="to">To</string>
+    <string name="customerName">Customer</string>
+    <string name="unitPrice">Unit Price</string>
+    <string name="totalPrice">Total Price</string>
     <string name="count">12</string>
     <string name="sellingsToday">Todays Sellings</string>
     <string name="product">Product</string>
