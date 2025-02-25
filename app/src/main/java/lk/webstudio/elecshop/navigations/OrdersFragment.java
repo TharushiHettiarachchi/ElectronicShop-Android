@@ -30,6 +30,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -264,7 +265,13 @@ class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.UserOrder
                     TextView alertProductTotalPrice = dialogView.findViewById(R.id.textView81);
                     TextView alertProductCustomer = dialogView.findViewById(R.id.textView83);
                     Button callBtn = dialogView.findViewById(R.id.button4);
+                    Button readyOrder = dialogView.findViewById(R.id.button);
 
+                    if(userOrder.getOrderStatus() == 2){
+                        readyOrder.setBackgroundColor(v.getResources().getColor(R.color.gray));
+                        readyOrder.setTextColor(v.getResources().getColor(R.color.darkGray));
+                        readyOrder.setText(R.string.onDelivery);
+                    }
 
                     alertProductName.setText(userOrder.getProductName());
                     alertProductCode.setText(userOrder.getProductCode());
@@ -281,7 +288,43 @@ class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.UserOrder
                             dialogView.getContext().startActivity(intent);
                         }
                     });
+                    readyOrder.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                            HashMap<String ,Object> updates = new HashMap<>();
+                            updates.put("status",2);
+                            firestore
+                                    .collection("orders")
+                                    .whereEqualTo("order_id", Integer.parseInt(userOrder.getOrderId()))
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                QuerySnapshot querySnap = task.getResult();
+                                                for (QueryDocumentSnapshot qs1 : querySnap) {
+                                                    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+                                                    firebaseFirestore
+                                                            .collection("orders")
+                                                            .document(qs1.getId())
+                                                            .update(updates)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    readyOrder.setBackgroundColor(v.getResources().getColor(R.color.gray));
+                                                                    readyOrder.setTextColor(v.getResources().getColor(R.color.darkGray));
+                                                                    readyOrder.setText(R.string.onDelivery);
+                                                                    userOrder.setOrderStatus(2);
+                                                                }
+                                                            });
+                                                }
+                                            }
+                                        }
+                                    });
 
+                        }
+                    });
 
 
 
@@ -310,5 +353,7 @@ class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.UserOrder
     public int getItemCount() {
         return userOrdersArrayList.size();
     }
+
+
 
 }

@@ -31,6 +31,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,7 @@ import lk.webstudio.elecshop.model.UserOrders;
 public class AllOrdersActivity extends AppCompatActivity {
     RecyclerView recyclerView2;
     ArrayList<UserOrders> orderlist = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,6 +163,7 @@ public class AllOrdersActivity extends AppCompatActivity {
 
 
     }
+
     public void allFetched() {
 
         LinearLayoutManager layoutManager2 = new LinearLayoutManager(AllOrdersActivity.this);
@@ -240,20 +243,29 @@ class UserOrdersAdapter1 extends RecyclerView.Adapter<UserOrdersAdapter1.UserOrd
                     View dialogView = inflater.inflate(R.layout.alert_order_view, null);
 
                     TextView alertProductName = dialogView.findViewById(R.id.textView73);
+                    TextView alertProductOrderID = dialogView.findViewById(R.id.textView70);
                     TextView alertProductCode = dialogView.findViewById(R.id.textView75);
                     TextView alertProductQty = dialogView.findViewById(R.id.textView79);
                     TextView alertProductUnitPrice = dialogView.findViewById(R.id.textView80);
                     TextView alertProductTotalPrice = dialogView.findViewById(R.id.textView81);
                     TextView alertProductCustomer = dialogView.findViewById(R.id.textView83);
                     Button callBtn = dialogView.findViewById(R.id.button4);
+                    Button readyOrder = dialogView.findViewById(R.id.button);
+
+                    if(userOrder.getOrderStatus() == 2){
+                        readyOrder.setBackgroundColor(v.getResources().getColor(R.color.gray));
+                        readyOrder.setTextColor(v.getResources().getColor(R.color.darkGray));
+                        readyOrder.setText(R.string.onDelivery);
+                    }
 
                     alertProductName.setText(userOrder.getProductName());
+                    alertProductOrderID.setText(userOrder.getOrderId());
                     alertProductCode.setText(userOrder.getProductCode());
                     alertProductQty.setText(String.valueOf(userOrder.getQty()));
                     alertProductUnitPrice.setText(String.valueOf(userOrder.getPrice()));
                     Double total = userOrder.getQty() * userOrder.getPrice();
                     alertProductTotalPrice.setText(String.valueOf(total));
-                    alertProductCustomer.setText(userOrder.getCustomerFname()+" "+userOrder.getCustomerLname());
+                    alertProductCustomer.setText(userOrder.getCustomerFname() + " " + userOrder.getCustomerLname());
                     callBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -262,8 +274,42 @@ class UserOrdersAdapter1 extends RecyclerView.Adapter<UserOrdersAdapter1.UserOrd
                             dialogView.getContext().startActivity(intent);
                         }
                     });
+                    readyOrder.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                            HashMap<String ,Object> updates = new HashMap<>();
+                            updates.put("status",2);
+                            firestore
+                                    .collection("orders")
+                                    .whereEqualTo("order_id", Integer.parseInt(userOrder.getOrderId()))
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                QuerySnapshot querySnap = task.getResult();
+                                                for (QueryDocumentSnapshot qs1 : querySnap) {
+                                                    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+                                                    firebaseFirestore
+                                                            .collection("orders")
+                                                            .document(qs1.getId())
+                                                            .update(updates)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    readyOrder.setBackgroundColor(v.getResources().getColor(R.color.gray));
+                                                                    readyOrder.setTextColor(v.getResources().getColor(R.color.darkGray));
+                                                                    readyOrder.setText(R.string.onDelivery);
+                                                                }
+                                                            });
+                                                }
+                                            }
+                                        }
+                                    });
 
-
+                        }
+                    });
 
 
                     builder.setView(dialogView)

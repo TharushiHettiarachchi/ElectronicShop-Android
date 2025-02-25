@@ -42,7 +42,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import lk.webstudio.elecshop.BroadcastCheck;
 import lk.webstudio.elecshop.HomeActivity;
@@ -62,7 +65,7 @@ public class ProfileFragment extends Fragment {
 
         BroadcastCheck broadcastCheck = new BroadcastCheck();
         IntentFilter intentFilter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
-        rootView.getContext().registerReceiver(broadcastCheck,intentFilter);
+        rootView.getContext().registerReceiver(broadcastCheck, intentFilter);
         LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
 
         boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -70,7 +73,7 @@ public class ProfileFragment extends Fragment {
 
         if (isGpsEnabled || isNetworkEnabled) {
             // Location is ON
-            Log.i("ElecLog","Location ON");
+            Log.i("ElecLog", "Location ON");
             EditText fname = rootView.findViewById(R.id.profileFname);
             EditText lname = rootView.findViewById(R.id.profileLname);
             EditText mobile = rootView.findViewById(R.id.profileMobile);
@@ -98,6 +101,93 @@ public class ProfileFragment extends Fragment {
                                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                                         String formattedDate = sdf.format(qs.getDate("registered_on"));
                                         profileDate.setText("Registered On " + formattedDate);
+
+
+                                        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+
+                                        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapLayout);
+                                        if (mapFragment == null) {
+                                            mapFragment = new SupportMapFragment();
+                                            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+                                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                                            fragmentTransaction.replace(R.id.mapLayout, mapFragment).commit();
+                                        }
+
+                                        mapFragment.getMapAsync(new OnMapReadyCallback() {
+                                            @Override
+                                            public void onMapReady(@NonNull GoogleMap googleMap) {
+                                                Log.i("ElecLog", "Map Ready");
+                                                mMap = googleMap;
+
+
+                                                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                                    mMap.setMyLocationEnabled(true);
+                                                    Map<String, Object> locationMap = (Map<String, Object>) qs.get("location");
+                                                    if (locationMap != null) {
+                                                        double latitude = (double) locationMap.get("latitude");
+                                                        double longitude = (double) locationMap.get("longitude");
+                                                        currentLatLng = new LatLng(latitude, longitude);
+
+                                                        // Move the camera to current location
+                                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+
+                                                        // Add a draggable marker
+                                                        Marker marker = mMap.addMarker(
+                                                                new MarkerOptions()
+                                                                        .position(currentLatLng)
+                                                                        .title("Me")
+                                                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.myloc))
+                                                                        .draggable(true) // Allow dragging
+                                                        );
+
+                                                        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                                                            @Override
+                                                            public void onMarkerDrag(@NonNull Marker marker) {
+                                                                // Optional: Provide real-time feedback during dragging
+                                                            }
+
+                                                            @Override
+                                                            public void onMarkerDragEnd(@NonNull Marker marker) {
+                                                                // Update currentLatLng when marker is dropped
+                                                                currentLatLng = marker.getPosition();
+                                                                Log.i("ElecLog", "Marker moved to: " + currentLatLng.latitude + ", " + currentLatLng.longitude);
+                                                            }
+
+                                                            @Override
+                                                            public void onMarkerDragStart(@NonNull Marker marker) {
+                                                                // Optional: Log or provide UI feedback when dragging starts
+                                                            }
+                                                        });
+
+                                                        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                                                            @Override
+                                                            public void onMapClick(@NonNull LatLng latLng) {
+                                                                mMap.clear();
+                                                                mMap.addMarker(
+                                                                        new MarkerOptions()
+                                                                                .position(currentLatLng)
+                                                                                .title("Me")
+                                                                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.myloc))
+                                                                                .draggable(true) // Allow dragging
+                                                                );
+                                                                currentLatLng = latLng;
+                                                            }
+                                                        });
+
+                                                    }else{
+                                                        getCurrentLocation();
+                                                    }
+
+
+
+                                                } else {
+                                                    requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+                                                }
+                                            }
+                                        });
+
+
                                     }
 
                                 } catch (Exception e) {
@@ -107,36 +197,8 @@ public class ProfileFragment extends Fragment {
                         }
                     });
 
-            // Initialize FusedLocationProviderClient
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
-            // Load the map
-            mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapLayout);
-            if (mapFragment == null) {
-                mapFragment = new SupportMapFragment();
-                FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.mapLayout, mapFragment).commit();
-            }
-
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(@NonNull GoogleMap googleMap) {
-                    Log.i("ElecLog", "Map Ready");
-                    mMap = googleMap;
-
-                    // Check and request permissions
-                    if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mMap.setMyLocationEnabled(true);
-                        getCurrentLocation();
 
 
-
-                    } else {
-                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
-                    }
-                }
-            });
 
             Button saveLocationBtn = rootView.findViewById(R.id.saveLocBtn);
             saveLocationBtn.setOnClickListener(new View.OnClickListener() {
@@ -146,26 +208,63 @@ public class ProfileFragment extends Fragment {
                     firestore
                             .collection("user")
                             .document(MainActivity.userLogId)
-                            .update("location",currentLatLng)
+                            .update("location", currentLatLng)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                    Toast.makeText(requireContext(),"Succesfully saved",Toast.LENGTH_LONG).show();
+                                    Toast.makeText(requireContext(), "Succesfully saved", Toast.LENGTH_LONG).show();
                                 }
                             });
 
 
                 }
             });
+
+            Button updateBtn = rootView.findViewById(R.id.updateBtn);
+            updateBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if (fname.getText().toString().isEmpty()) {
+                        Toast.makeText(rootView.getContext(), "Please Enter the First Name", Toast.LENGTH_LONG).show();
+                    } else if (lname.getText().toString().isEmpty()) {
+                        Toast.makeText(rootView.getContext(), "Please Enter the Last Name", Toast.LENGTH_LONG).show();
+                    } else if (mobile.getText().toString().isEmpty()) {
+                        Toast.makeText(rootView.getContext(), "Please Enter the Mobile Number", Toast.LENGTH_LONG).show();
+                    } else if (password.getText().toString().isEmpty()) {
+                        Toast.makeText(rootView.getContext(), "Please Enter the Password", Toast.LENGTH_LONG).show();
+                    } else {
+                        HashMap<String, Object> updatelis = new HashMap<>();
+                        updatelis.put("mobile", mobile.getText().toString());
+                        updatelis.put("firstName", fname.getText().toString());
+                        updatelis.put("lastName", lname.getText().toString());
+                        updatelis.put("password", password.getText().toString());
+
+                        FirebaseFirestore firestore1 = FirebaseFirestore.getInstance();
+                        firestore1
+                                .collection("user")
+                                .document(MainActivity.userLogId)
+                                .update(updatelis)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Toast.makeText(rootView.getContext(), "Profile Updated", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                    }
+
+
+                }
+            });
+
+
         } else {
             // Location is OFF
-            Log.i("ElecLog","Location OFF");
-            Toast.makeText(requireContext(),"Please Turn on Location",Toast.LENGTH_LONG).show();
+            Log.i("ElecLog", "Location OFF");
+            Toast.makeText(requireContext(), "Please Turn on Location", Toast.LENGTH_LONG).show();
             Intent i = new Intent(requireContext(), HomeActivity.class);
             startActivity(i);
         }
-
-
 
 
         return rootView;

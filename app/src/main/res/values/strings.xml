@@ -25,7 +25,10 @@
     <string name="menuGroup1">Buyers</string>
     <string name="menuGroup2">Sellers</string>
     <string name="menuGroup3">Other</string>
+    <string name="message1">Do you want to delete this product?</string>
     <string name="search">Search</string>
+    <string name="onDelivery">On Delivery</string>
+       <string name="update">Update</string>
     <string name="view">View</string>
     <string name="orderId">Order ID</string>
     <string name="allOrders">All Orders</string>
